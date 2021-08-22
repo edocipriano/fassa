@@ -1,7 +1,7 @@
 import numpy as np
+import math
 import FieldTypes
 import vof.normals
-import vof.reconstruct
 import paris.fl3d
 import paris.al3d
 
@@ -33,7 +33,7 @@ class Advector:
                 self.n[i,j] = vof.normals.mycs(stencil3x3)
                 mxyz = self.n[i,j,:]
                 alpha1ij = self.alpha1.cells[i,j]
-                self.cplane[i,j] = vof.reconstruct.al3d(mxyz, alpha1ij)
+                self.cplane[i,j] = paris.al3d.al3d(mxyz, alpha1ij)
 
 
     def updateNormals(self):
@@ -48,7 +48,7 @@ class Advector:
             for j in range(1, self.mesh.ny+1):
                 mxyz = self.n[i,j,:]
                 alpha1ij = self.alpha1.cells[i,j]
-                self.cplane[i,j] = vof.reconstruct.al3d(mxyz, alpha1ij)
+                self.cplane[i,j] = paris.al3d.al3d(mxyz, alpha1ij)
 
 
     def cMask(self):
@@ -221,13 +221,15 @@ class Advector:
                         # Se la cella è tagliata ma fl3d non trova il taglio allora dipende dalle celle vicinali:
                         # Se a destra c'è una cella liquida fluxa tutto il volumetto a2
                         if a2 > 0:
-                            if self.alpha1.cells[i+ii,j+jj] == 1: # Meglio > 0.5 ?
+                            #if self.alpha1.cells[i+ii,j+jj] == 1: # Meglio > 0.5 ?
+                            if self.alpha1.cells[i+ii,j+jj] > 0.5:
                                 self.vof3[i,j] = a2
                             # Se a destra c'è una cella gas non fluxa liquido
                             else:
                                 self.vof3[i,j] = 0.0
                         if a1 < 0:
-                            if self.alpha1.cells[i-ii,j-jj] == 1: # Meglio > 0.5 ?
+                            #if self.alpha1.cells[i-ii,j-jj] == 1: # Meglio > 0.5 ?
+                            if self.alpha1.cells[i-ii,j-jj] > 0.5:
                                 self.vof1[i,j] = -a2
                             else:
                                 self.vof1[i,j] = 0.0
@@ -236,13 +238,24 @@ class Advector:
             for i in range(1, self.mesh.nx+1):
                 a2 = vel[i,j]*dt/dxyz
                 a1 = vel[i-ii,j-jj]*dt/dxyz
+
+                newalpha = self.alpha1.cells[i,j] - (self.vof3[i,j] - self.vof1[i+ii,j+jj]) + \
+                                (self.vof3[i-ii,j-jj] - self.vof1[i,j]) + self.cg[i,j]*(a2-a1)
+                """
                 self.alpha1.cells[i,j] = self.alpha1.cells[i,j] - (self.vof3[i,j] - self.vof1[i+ii,j+jj]) + \
                                 (self.vof3[i-ii,j-jj] - self.vof1[i,j]) + self.cg[i,j]*(a2-a1)
+                """
+                if math.isnan(newalpha):
+                    sommaDivFree = self.u.cells[i,j] - self.u.cells[i-1,j] + self.v.cells[i,j] - self.v.cells[i,j-1]
+                    #print(sommaDivFree)
+                else:
+                    self.alpha1.cells[i,j] = newalpha
 
 
     def advect(self):
         #self.reconstruct()
         self.computeFluxes()    # internal reconstruction only where needed
+        #self.redistribute()
         self.clip()
         self.alpha1.updateBCs()
 
@@ -255,6 +268,20 @@ class Advector:
                 if self.alpha1.cells[i,j] > 1.-self.EPSC:
                     self.alpha1.cells[i,j] = 1.
 
+    """
+    def redistribute(self):
+        if self.alpha1.cells[i,j] > 1:
+            eps = self.alpha1.cells[i,j] - 1.
+
+            stencil3x3 = self.getStencil3x3(i,j)
+
+            # Find max value < 1 = maxValMinOne in ii, jj
+            cT = maxValMinOne + eps
+
+            # Re-define color function values
+            self.alpha1.cells[ii,jj] = min(cT, 1.)
+            self.alpha1.cells[i,j] = max(cT, 1.)
+    """
 
     def setEPSC(self, epsc=1.e-6):
         self.EPSC = epsc

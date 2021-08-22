@@ -28,7 +28,7 @@ def main():
     timeDict = {"totTime"       : 0.8,
                 "writeNow"      : False,
                 "runTimeDeltaT" : False,
-                "safety"        : 0.05,
+                "safety"        : 0.5,
                 "deltaT"        : 1.e-2,
                 "writeSteps"    : 1}
 
@@ -96,8 +96,10 @@ def main():
         for j in range(mesh.ny+2):
             u.cells[1:,j] = mesh.Cx[:]/2.
 
+        """
         for i in range(mesh.nx+2):
-            v.cells[i,1:] = mesh.Cy[:]/2.
+            v.cells[i,1:] = mesh.Cy[:]/4.
+        """
 
         dtMin = timeStepSelector.Co(u, v)
         time.setDeltaT(dtMin)

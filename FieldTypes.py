@@ -15,6 +15,10 @@ def ScalarField(mesh, fieldType="centered"):
         NotImplemented
 
 
+def ScalarNodesField(mesh):
+    return np.zeros([mesh.nx+1, mesh.ny+1])
+
+
 def VectorField(mesh, fieldType="centered"):
 
     if fieldType == "centered":
@@ -33,5 +37,8 @@ def VectorField(mesh, fieldType="centered"):
 def SurfaceField(mesh):
     return np.zeros([mesh.nx+2, mesh.ny+2, 4])
 
+
 def BoolField(mesh, value):
     return np.ones([mesh.nx+2, mesh.ny+2])*value
+
+

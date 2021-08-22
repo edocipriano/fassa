@@ -53,6 +53,12 @@ class Time:
             else:
                 return False
 
+
+    def print(self):
+        print("Step: %d - Time: %f"%(self.nTimeSteps, self.value))
+
+
+
 def main():
 
     # Create Mesh and set Boundaries
@@ -81,7 +87,5 @@ def main():
         if time.toWrite():
             #utils.write.writeVtk(fields)
             print("    Time to write!")
-
-
 if __name__=="__main__":
     main()

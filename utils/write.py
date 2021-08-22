@@ -60,7 +60,7 @@ def writeVtk(path, mesh, *fields):
         f.write("POINT_DATA "+str(nNodes)+"\n")
         f.write("SCALARS "+field.name+" float 1\n")
         f.write("LOOKUP_TABLE "+field.name+"_point_table\n")
-        field.nodeInterpolation()
+        #field.nodeInterpolation()
         for j in range(y_dim):
             for i in range(x_dim):
                 f.write(str(field.nodes[i,j])+" ")

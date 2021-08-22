@@ -1,12 +1,13 @@
 import numpy as np
 from hexCMesh import hexCMesh
 from Time import Time
-from Field import Field, onesField
+from Field import Field, onesField, nodeInterpolations
 import BCs
 import utils.write
 from solve.explicit.ProjectionMethod import ProjectionMethod
 import fluxes
 from solve.explicit.divergence import div as expdiv
+import timeStepSelector
 
 def main():
 
@@ -21,7 +22,7 @@ def main():
     mesh.setBasicCorners()
 
     # Create Time
-    timeDict = {"totTime"       : 10,
+    timeDict = {"totTime"       : 5,
                 "writeNow"      : False,
                 "runTimeDeltaT" : False,
                 "safety"        : 1,
@@ -71,6 +72,11 @@ def main():
 
         BCs.updateBCs(u, v)
 
+        dtMin = timeStepSelector.Co(u, v)
+        time.setDeltaT(dtMin)
+        print("Minimum deltaT for stabilization = %.10f"% dtMin)
+        print("Current deltaT = %.10f"% time.deltaT)
+
         projection.predictorStep(nu)
         projection.projectionStep()
         projection.correctVelocity()
@@ -81,6 +87,7 @@ def main():
         div = expdiv(phi, onesField(mesh))
 
         if time.toWrite():
+            nodeInterpolations(u, v, p, div)
             filePath = "results/cavity_"+str(time.nTimeSteps)+".vtk"
             utils.write.writeVtk(filePath, mesh, u, v, p, div)
 

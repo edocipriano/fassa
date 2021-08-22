@@ -34,6 +34,7 @@ class Field:
             NotImplemented
 
         self.faces = FieldTypes.SurfaceField(mesh)
+        self.nodes = FieldTypes.ScalarNodesField(mesh)
 
 
     def _setCellCenteredField(self):
@@ -55,7 +56,6 @@ class Field:
         """
         nx = self.mesh.nx
         ny = self.mesh.ny
-        self.nodes = np.zeros([nx+1, ny+1])
 
         if self.centered == True:
             self.nodes[0:nx+1,0:ny+1] = 0.25*(self.cells[0:nx+1,0:ny+1] + \
@@ -106,8 +106,8 @@ class Field:
 
     def interpolate(self):
 
-        for i in range(1, self.mesh.nx):
-            for j in range(1, self.mesh.ny):
+        for i in range(1, self.mesh.nx+1):
+            for j in range(1, self.mesh.ny+1):
                 self.faces[i,j,0] = 0.5*(self.cells[i,j] + self.cells[i,j+1])
                 self.faces[i,j,1] = 0.5*(self.cells[i,j] + self.cells[i,j-1])
                 self.faces[i,j,2] = 0.5*(self.cells[i,j] + self.cells[i+1,j])
@@ -143,4 +143,7 @@ def onesField(mesh):
 def zerosField(mesh):
     return Field("zeros", None, mesh, 0.)
 
+def nodeInterpolations(*fields):
+    for field in fields:
+        field.nodeInterpolation()
 
