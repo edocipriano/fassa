@@ -1,0 +1,15 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module area3d ! in 
+    interface  ! in :area3d
+        function area3d(nr,cc) ! in :area3d:area3d.f90
+            real(kind=8) dimension(3),intent(in) :: nr
+            real(kind=8) intent(in) :: cc
+            real(kind=8) :: area3d
+        end function area3d
+    end interface 
+end python module area3d
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

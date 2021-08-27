@@ -1,0 +1,1 @@
+g++ -I $VOFI_LIBRARY_PATH/include -L $VOFI_LIBRARY_PATH/lib -lvofi main_circle.cpp circle.cpp -o circle

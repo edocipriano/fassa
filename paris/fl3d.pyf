@@ -1,0 +1,17 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module fl3d ! in 
+    interface  ! in :fl3d
+        function fl3d(nr,alpha,x0,dx) ! in :fl3d:fl3d.f90
+            real(kind=8) dimension(3),intent(in) :: nr
+            real(kind=8) intent(in) :: alpha
+            real(kind=8) dimension(3),intent(in) :: x0
+            real(kind=8) dimension(3),intent(in) :: dx
+            real(kind=8) :: fl3d
+        end function fl3d
+    end interface 
+end python module fl3d
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

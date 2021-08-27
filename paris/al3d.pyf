@@ -1,0 +1,15 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module al3d ! in 
+    interface  ! in :al3d
+        function al3d(nr,cc) ! in :al3d:al3d.f90
+            real(kind=8) dimension(3),intent(in) :: nr
+            real(kind=8) intent(in) :: cc
+            real(kind=8) :: al3d
+        end function al3d
+    end interface 
+end python module al3d
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/
