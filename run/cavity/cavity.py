@@ -7,7 +7,7 @@ import fassa.solve.explicit
 def main():
 
     if os.path.exists("results") == False:
-        os.system("mkdir results")
+        os.mkdir("results")
 
     # Create Mesh and set Boundaries
     meshDict = {"Lx" : 1,
