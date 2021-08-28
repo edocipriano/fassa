@@ -22,7 +22,7 @@ def writeVtkMesh(mesh):
     f.close()
 
 
-def writeVtk(path, mesh, *fields):
+def writeVtk(path, mesh, *fields, interpolate=False):
 
     x_dim = len(mesh.x)
     y_dim = len(mesh.y)
@@ -55,6 +55,9 @@ def writeVtk(path, mesh, *fields):
                 f.write(str(field.cells[i,j])+" ")
         f.write("\n")
 
+        if interpolate == True:
+            field.nodeInterpolation()
+
         f.write("POINT_DATA "+str(nNodes)+"\n")
         f.write("SCALARS "+field.name+" float 1\n")
         f.write("LOOKUP_TABLE "+field.name+"_point_table\n")
@@ -64,4 +67,10 @@ def writeVtk(path, mesh, *fields):
                 f.write(str(field.nodes[i,j])+" ")
 
     f.close()
+
+
+def writeVtk(field, interpolate=False):
+    mesh = field.mesh
+    path = field.name()+".vtk"
+    writeVtk(path, mesh, field, interpolate)
 
