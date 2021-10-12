@@ -276,6 +276,11 @@ class Advector:
         self.print()
 
 
+    def evaporate(self, alphaSource):
+        print("Performing evaporation step")
+        self.alpha1.cells[:] += alphaSource.cells[:]*self.time.deltaT
+
+
     def clip(self):
         for i in range(self.mesh.nx+2):
             for j in range(self.mesh.ny+2):

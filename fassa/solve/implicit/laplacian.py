@@ -9,6 +9,8 @@ def laplacian(Coeff, field):
 
     Adense = np.zeros([nxmat, nymat])
     bdense = np.zeros([mesh.nx*mesh.ny,1])
+    #Adense = sparse.lil_matrix([nxmat, nymat])
+    #bdense = sparse.lil_matrix([mesh.nx*mesh.ny,1])
 
     AEij = -2*Coeff/( (2*mesh.step)*(mesh.step) )
     AWij = -2*Coeff/( (2*mesh.step)*(mesh.step) )
@@ -35,5 +37,6 @@ def laplacian(Coeff, field):
                 Adense[i,j] = AWij
 
     return sparse.csr_matrix(Adense), sparse.csr_matrix(bdense)
+    #return Adense, bdense
 
 
