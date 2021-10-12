@@ -1,8 +1,6 @@
 import numpy as np
 import os
 import fassa
-import fassa.vof
-import fassa.utils
 
 def main():
 
