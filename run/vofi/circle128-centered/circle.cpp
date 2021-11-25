@@ -41,8 +41,8 @@ using namespace std;
 static double a1 = 0.15;
 static double b1 = 0.15;
 static double alpha = 0.48;
-static double xc = 0.5;
-static double yc = 0.75;
+static double xc = 0.2;
+static double yc = 0.5;
 
 /* -------------------------------------------------------------------------- */
 

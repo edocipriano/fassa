@@ -85,3 +85,13 @@ class hexCMesh:
         self.setCorner("NE", np.index_exp[-1,-1], np.index_exp[-2,-2])
         self.setCorner("NW", np.index_exp[0,-1],  np.index_exp[1,-2])
 
+
+def basicMesh(nx=50,ny=50):
+
+    meshDict = {"Lx" : 1,
+                "Ly" : 1,
+                "nx" : nx,
+                "ny" : ny}
+
+    return hexCMesh(meshDict)
+

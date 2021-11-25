@@ -1,6 +1,8 @@
 import numpy as np
 import os
 import fassa
+import fassa.vof
+import fassa.utils
 
 def main():
 
@@ -23,10 +25,10 @@ def main():
 
     # Create Time
     timeDict = {"totTime"       : T,
-                "writeNow"      : False,
+                "writeNow"      : True,
                 "runTimeDeltaT" : False,
                 "safety"        : 1,
-                "deltaT"        : 1.e-3,
+                "deltaT"        : 1.e-2,
                 "writeSteps"    : 10}
 
     time = fassa.Time(timeDict, mesh)
@@ -42,10 +44,9 @@ def main():
                   "W" : ("zeroGradient", None)}
 
     alpha1 = fassa.Field("alpha1", alpha1Dict, mesh, 0.)
-    alphaSource = fassa.Field("alphaSource", None, mesh, 0.)
 
     # Read log from VOFI initialization
-    fassa.vof.utils.readVofi("run/vofi/circle64/log", alpha1)
+    fassa.vof.utils.readVofi("../vofi/circle64/log", alpha1)
 
     advector = fassa.vof.Advector(alpha1, u, v, time)
 
@@ -58,6 +59,9 @@ def main():
     nx = fassa.Field("nx", None, mesh, 0.)
     ny = fassa.Field("ny", None, mesh, 0.)
 
+    # Gradient
+    gradAlpha1 = fassa.Field("gradAlpha", None, mesh, 0.)
+
     # Solution loop
     while time.toRun():
 
@@ -69,31 +73,25 @@ def main():
         # Compute velocity from the stream function
         velocityFromStreamfunction(phi, u, v)
 
-        print("\nCurrent deltaT = %.10f"% time.deltaT)
+        dtMin = fassa.timeStepSelector.alphaCo(u, v)
+        time.setDeltaT(dtMin)
+        print("\nMinimum deltaT for stabilization = %.10f"% dtMin)
+        print("Current deltaT = %.10f"% time.deltaT)
 
         time.print()
 
-        # Compute vaporization source term
-        alphaSource.cells[:] = 0.
-        for i in range(1, mesh.nx+1):
-            for j in range(1, mesh.ny+1):
-                if alpha1.cells[i,j] > 1.e-6 and alpha1.cells[i,j] < 1.-1.e-6:
-                    alphaSource.cells[i,j] = -1
-
-        # Evaporation
-        advector.evaporate(alphaSource)
-
-        # Advection
         advector.advect()
+
+        gradvec, gradAlpha1.cells = fassa.solve.explicit.operators.grad(alpha1.cells)
 
         # Assign fields to visualise
         nx.cells[:,:] = advector.n[:,:,0]
         ny.cells[:,:] = advector.n[:,:,1]
 
         if time.toWrite():
-            fassa.nodeInterpolations(u, v, alpha1, nx, ny)
-            filePath = "results/evaporation_"+str(time.nTimeSteps)+".vtk"
-            fassa.utils.write.writeVtk(filePath, mesh, u, v, nx, ny, alpha1, phi)
+            fassa.nodeInterpolations(u, v, alpha1, nx, ny, gradAlpha1)
+            filePath = "results/vortex_"+str(time.nTimeSteps)+".vtk"
+            fassa.utils.write.writeVtk(filePath, mesh, u, v, nx, ny, alpha1, phi, gradAlpha1)
 
     print("\nEnd\n")
 
