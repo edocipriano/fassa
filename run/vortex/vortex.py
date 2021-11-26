@@ -2,7 +2,6 @@ import numpy as np
 import os
 import fassa
 import fassa.vof
-import fassa.utils
 
 def main():
 
@@ -12,8 +11,8 @@ def main():
     # Create Mesh and set Boundaries
     meshDict = {"Lx" : 1,
                 "Ly" : 1,
-                "nx" : 64,
-                "ny" : 64}
+                "nx" : 128,
+                "ny" : 128}
 
     mesh = fassa.hexCMesh(meshDict)
     mesh.setBasicBoundaries()
@@ -46,7 +45,8 @@ def main():
     alpha1 = fassa.Field("alpha1", alpha1Dict, mesh, 0.)
 
     # Read log from VOFI initialization
-    fassa.vof.utils.readVofi("../vofi/circle64/log", alpha1)
+    #fassa.vof.utils.readVofi("../vofi/circle64/log", alpha1)
+    fassa.vof.utils.readVofi("../vofi/circle128-centered/log", alpha1)
 
     advector = fassa.vof.Advector(alpha1, u, v, time)
 
@@ -86,7 +86,7 @@ def main():
         if time.toWrite():
             fassa.nodeInterpolations(u, v, alpha1, nx, ny)
             filePath = "results/vortex_"+str(time.nTimeSteps)+".vtk"
-            fassa.utils.write.writeVtk(filePath, mesh, u, v, nx, ny, alpha1, phi)
+            fassa.writeVtk(filePath, mesh, u, v, nx, ny, alpha1, phi)
 
     print("\nEnd\n")
 

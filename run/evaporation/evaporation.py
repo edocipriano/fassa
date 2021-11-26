@@ -45,7 +45,7 @@ def main():
     alphaSource = fassa.Field("alphaSource", None, mesh, 0.)
 
     # Read log from VOFI initialization
-    fassa.vof.utils.readVofi("run/vofi/circle64/log", alpha1)
+    fassa.vof.utils.readVofi("../vofi/circle64/log", alpha1)
 
     advector = fassa.vof.Advector(alpha1, u, v, time)
 
@@ -93,7 +93,7 @@ def main():
         if time.toWrite():
             fassa.nodeInterpolations(u, v, alpha1, nx, ny)
             filePath = "results/evaporation_"+str(time.nTimeSteps)+".vtk"
-            fassa.utils.write.writeVtk(filePath, mesh, u, v, nx, ny, alpha1, phi)
+            fassa.writeVtk(filePath, mesh, u, v, nx, ny, alpha1, phi)
 
     print("\nEnd\n")
 

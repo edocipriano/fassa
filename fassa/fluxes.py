@@ -23,7 +23,7 @@ def ndS(mesh):
 
 def volumetricFlux(u, v):
     mesh = u.mesh
-    phi = fieldtypes.SurfaceField(mesh)
+    phi = fassa.fieldtypes.SurfaceField(mesh)
     nds = ndS(mesh)
 
     for i in range(1, mesh.nx+1):

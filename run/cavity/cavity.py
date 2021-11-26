@@ -1,8 +1,6 @@
 import numpy as np
 import os
 import fassa
-import fassa.utils
-import fassa.solve.explicit
 
 def main():
 
@@ -61,7 +59,7 @@ def main():
                       "maxError" : 1.e-4,
                       "SORCoeff" : 1.45}
 
-    projection = fassa.solve.explicit.ProjectionMethod(u, v, p, mesh, time, projectionDict)
+    projection = fassa.ProjectionMethod(u, v, p, mesh, time, projectionDict)
 
     # Solution loop
     while time.toRun():
@@ -79,13 +77,13 @@ def main():
 
         projection.print()
 
-        phi = fassa.fluxes.volumetricFlux(u,v)
-        div = fassa.solve.explicit.div(phi, fassa.onesField(mesh))
+        phi = fassa.volumetricFlux(u,v)
+        div = fassa.div(phi, fassa.onesField(mesh))
 
         if time.toWrite():
             fassa.nodeInterpolations(u, v, p, div)
             filePath = "results/cavity_"+str(time.nTimeSteps)+".vtk"
-            fassa.utils.write.writeVtk(filePath, mesh, u, v, p, div)
+            fassa.writeVtk(filePath, mesh, u, v, p, div)
 
     print("\nEnd\n")
 
