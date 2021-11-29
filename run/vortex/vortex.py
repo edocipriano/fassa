@@ -45,8 +45,7 @@ def main():
     alpha1 = fassa.Field("alpha1", alpha1Dict, mesh, 0.)
 
     # Read log from VOFI initialization
-    #fassa.vof.utils.readVofi("../vofi/circle64/log", alpha1)
-    fassa.vof.utils.readVofi("../vofi/circle128-centered/log", alpha1)
+    fassa.vof.utils.readVofi("../vofi/circle"+str(mesh.nx)+"/log", alpha1)
 
     advector = fassa.vof.Advector(alpha1, u, v, time)
 
@@ -98,14 +97,25 @@ def velocityFromStreamfunction(phi, u, v):
     mesh = u.mesh
 
     # u = d(phi)/dy
+    """
     for i in range(1, mesh.nx+1):
         for j in range(1, mesh.ny):
              u.cells[i,j] = (phi.nodes[i,j] - phi.nodes[i,j-1])/(mesh.y[j] - mesh.y[j-1])
+    """
 
+    for i in range(1, mesh.nx):
+        for j in range(1, mesh.ny):
+            u.cells[i,j] =  (phi.nodes[i,j+1] - phi.nodes[i,j-1])/(mesh.y[j+1] - mesh.y[j-1])
+
+    """
     # v = -d(phi)/dx
     for i in range(1, mesh.nx):
         for j in range(1, mesh.ny+1):
             v.cells[i,j] = -(phi.nodes[i,j] - phi.nodes[i-1,j])/(mesh.x[i] - mesh.x[i-1])
+    """
+    for i in range(1, mesh.nx):
+        for j in range(1, mesh.ny):
+            v.cells[i,j] = -(phi.nodes[i+1,j] - phi.nodes[i-1,j])/(mesh.x[i+1] - mesh.x[i-1])
 
 
 if __name__=="__main__":
