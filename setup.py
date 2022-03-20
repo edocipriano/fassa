@@ -26,7 +26,7 @@ setup(name='fassa',
       author='Edoardo Cipriano',
       author_email='edoardo.cipriano@polimi.it',
       license='MIT',
-      install_requires=['numpy','scipy'],
+      install_requires=['numpy','scipy','numba'],
       test_suite='',
       ext_modules = [ext1, ext2, ext3]
     )
