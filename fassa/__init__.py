@@ -12,3 +12,4 @@ from .velocityFromStreamfunction import *
 from .divergence import *
 from .fieldtypes import *
 from .fluxes import *
+from .operators import *

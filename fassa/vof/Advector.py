@@ -198,10 +198,6 @@ class Advector:
                     self.alpha1.cells[i,j] = 0.
                 if self.alpha1.cells[i,j] > 1.-self.EPSC:
                     self.alpha1.cells[i,j] = 1.
-        """
-        self.alpha1.cells[(self.alpha1.cells[i,j] < self.EPSC)] = 0.
-        self.alpha1.cells[(self.alpha1.cells[i,j] > self.EPSC)] = 1.
-        """
 
 
     def setEPSC(self, epsc=1.e-6):
@@ -217,41 +213,6 @@ class Advector:
                 stencil3x3[ii,jj,:] = self.alpha1.cells[i+indexlist[ii],j+indexlist[jj]]
 
         return stencil3x3
-
-
-    """
-    def redistribute(self):
-        for i in range(1, self.mesh.nx+1):
-            for j in range(1, self.mesh.nx+1):
-
-                # Fix over-shoots
-                if self.alpha1.cells[i,j] > 1.
-                    eps = self.alpha1.cells[i,j] - 1.
-                    whereMax, listMax = self.getOrderedListMaxLessThan1(self.getStencil3x3(i,j))
-                    rows = whereMax[0]
-                    cols = whereMax[1]
-
-                    for ii in range(len(rows)):
-                        for jj in range(len(cols)):
-                            cTij = self.alpha1.cells[ii,jj] + eps
-                            self.alpha1.cells[i,j] = max(cTij, 1)
-    """
-
-
-    def _getOrderedListMaxLessThan1(self, stencil3x3):
-        stencil3x3[1,1] = -50
-        where = np.where(stencil3x3 < 1.)
-        listMaxLessThan1 = -np.sort(-stencil3x3[where])
-
-        return where, listMaxLessThan1
-
-
-    def _getOrderedListMinGreaterThan0(self, stencil3x3):
-        stencil3x3[1,1] = 50
-        where = np.where(stencil3x3 > 0.)
-        listMinGreaterThan0 = np.sort(stencil3x3[where])
-
-        return where, listMinGreaterThan0
 
 
     def print(self):

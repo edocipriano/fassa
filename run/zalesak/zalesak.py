@@ -54,6 +54,12 @@ def main():
     nx = fassa.Field("nx", None, mesh, 0.)
     ny = fassa.Field("ny", None, mesh, 0.)
 
+    # Output file
+    out = open("Output.out", "w")
+    out.write("time[s] mass[kg]\n")
+    out.close()
+    liqvolume0 = volume_integral(alpha1)
+
     # Solution loop
     while time.toRun():
 
@@ -71,6 +77,11 @@ def main():
 
         advector.advect()
 
+        liqvolume = volume_integral(alpha1)
+        out = open("Output.out", "a")
+        out.write("%f %f\n"%(time.value, liqvolume/liqvolume0))
+        out.close()
+
         # Assign fields to visualise
         nx.cells[:,:] = advector.n[:,:,0]
         ny.cells[:,:] = advector.n[:,:,1]
@@ -81,6 +92,17 @@ def main():
             fassa.writeVtk(filePath, mesh, u, v, nx, ny, alpha1, phi)
 
     print("\nEnd\n")
+
+
+def volume_integral(alpha1):
+    mesh = alpha1.mesh
+    integral = 0.
+    for i in range(1, mesh.nx+1):
+        for j in range(1, mesh.ny+1):
+            integral += alpha1.cells[i,j]*mesh.step**3
+
+    return integral
+
 
 
 if __name__=="__main__":
