@@ -89,96 +89,6 @@ class Advector:
         self.fluxes1dir("y", self.v.cells)
 
 
-    def myflux(self, direction, vel):
-
-        mesh = self.mesh
-        dt = self.time.deltaT
-        alpha1 = self.alpha1.cells
-        self.fluxRight = fassa.fieldtypes.ScalarField(mesh)
-        self.fluxLeft  = fassa.fieldtypes.ScalarField(mesh)
-        self.notEmpty = fassa.fieldtypes.BoolField(mesh, False)
-
-        ii, jj = 0, 0
-        d = -1
-        if direction == "x":
-            ii = 1
-            dd = 0
-        elif direction == "y":
-            jj = 1
-            dd = 1
-        else:
-            NotImplemented
-
-        dxyz = mesh.step
-
-        for j in range(1, mesh.ny+1):
-            for i in range(1, mesh.nx+1):
-                a2 = vel[i,j]*dt/dxyz
-                a1 = vel[i-ii,j-jj]*dt/dxyz
-
-                # Se la cella non ha liquido non fluxa niente
-                if self.alpha1.cells[i,j] == 0:
-                    self.fluxRight[i,j] = 0
-                    self.fluxLeft[i,j] = 0
-                # Se la cella è tutta liquida fluxa tutto il volumetto a2
-                elif self.alpha1.cells[i,j] == 1:
-                    self.fluxRight[i,j] = max(a2, 0.)    # se vDx > 0 usa il rettangolo a destra
-                    self.fluxLeft[i,j]  = max(-a1, 0.)   # se vSx < 0 usa il rettangolo a sinistra
-                    """
-                    if a1 < 0:
-                        self.fout[i,j] = -a1
-                    if a2 > 0:
-                        self.fout[i,j] = a2
-                    """
-                else:
-                    stencil3x3 = self.getStencil3x3(i,j)
-                    mxyz = paris.mycs(stencil3x3)
-                    al = paris.al3d(mxyz, self.alpha1.cells[i,j])
-
-                    x0 = [0,0,0]
-                    dx = [1,1,1]
-
-                    #dx[dd] = a2
-                    #x0[dd] = 1.-a2
-
-                    if a1 < 0:
-                        dx[dd] = -a1
-                    if a2 > 0:
-                        x0[dd] = 1.-a2
-                        dx[dd] = a2
-
-                    fl = paris.fl3d(mxyz, al, x0, dx)
-
-                    if fl != 0:
-                        #self.fout[i,j] = fl # Se la cella è tagliata e fl3d trova il taglio allora fluxa la shaded area fl
-                        if a1 < 0:
-                            self.fluxLeft[i,j] = fl
-                        if a2 > 0:
-                            self.fluxRight[i,j] = fl
-                    else:
-                        # Se la cella è tagliata ma fl3d non trova il taglio allora dipende dalle celle vicinali:
-                        # Se a destra c'è una cella liquida fluxa tutto il volumetto a2
-                        if a2 > 0:
-                            if self.alpha1.cells[i+ii,j+jj] == 1:
-                                self.fluxRight[i,j] = a2
-                            # Se a destra c'è una cella gas non fluxa liquido
-                            else:
-                                self.fluxRight[i,j] = 0.0
-                        if a1 < 0:
-                            if self.alpha1.cells[i-ii,j-jj] == 1:
-                                self.fluxLeft[i,j] = -a2
-                            else:
-                                self.fluxLeft[i,j] = 0.0
-
-        for j in range(1, self.mesh.ny+1):
-            for i in range(1, self.mesh.nx+1):
-                a2 = vel[i,j]*dt/dxyz
-                a1 = vel[i-ii,j-jj]*dt/dxyz
-
-                self.alpha1.cells[i,j] = self.alpha1.cells[i,j] - (self.fluxRight[i,j] - self.fluxLeft[i+ii,j+jj]) + \
-                                (self.fluxRight[i-ii,j-jj] - self.fluxLeft[i,j]) + self.cg[i,j]*(a2-a1)
-
-
     def fluxes1dir(self, direction, vel):
 
         mesh = self.mesh
@@ -288,10 +198,6 @@ class Advector:
                     self.alpha1.cells[i,j] = 0.
                 if self.alpha1.cells[i,j] > 1.-self.EPSC:
                     self.alpha1.cells[i,j] = 1.
-        """
-        self.alpha1.cells[(self.alpha1.cells[i,j] < self.EPSC)] = 0.
-        self.alpha1.cells[(self.alpha1.cells[i,j] > self.EPSC)] = 1.
-        """
 
 
     def setEPSC(self, epsc=1.e-6):
@@ -307,41 +213,6 @@ class Advector:
                 stencil3x3[ii,jj,:] = self.alpha1.cells[i+indexlist[ii],j+indexlist[jj]]
 
         return stencil3x3
-
-
-    """
-    def redistribute(self):
-        for i in range(1, self.mesh.nx+1):
-            for j in range(1, self.mesh.nx+1):
-
-                # Fix over-shoots
-                if self.alpha1.cells[i,j] > 1.
-                    eps = self.alpha1.cells[i,j] - 1.
-                    whereMax, listMax = self.getOrderedListMaxLessThan1(self.getStencil3x3(i,j))
-                    rows = whereMax[0]
-                    cols = whereMax[1]
-
-                    for ii in range(len(rows)):
-                        for jj in range(len(cols)):
-                            cTij = self.alpha1.cells[ii,jj] + eps
-                            self.alpha1.cells[i,j] = max(cTij, 1)
-    """
-
-
-    def _getOrderedListMaxLessThan1(self, stencil3x3):
-        stencil3x3[1,1] = -50
-        where = np.where(stencil3x3 < 1.)
-        listMaxLessThan1 = -np.sort(-stencil3x3[where])
-
-        return where, listMaxLessThan1
-
-
-    def _getOrderedListMinGreaterThan0(self, stencil3x3):
-        stencil3x3[1,1] = 50
-        where = np.where(stencil3x3 > 0.)
-        listMinGreaterThan0 = np.sort(stencil3x3[where])
-
-        return where, listMinGreaterThan0
 
 
     def print(self):

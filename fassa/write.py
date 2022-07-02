@@ -39,7 +39,7 @@ def writeVtk(path, mesh, *fields):
     f.write("DIMENSIONS "+str(x_dim)+" "+str(y_dim)+" "+str(1)+"\n")
     f.write("POINTS "+str(nNodes)+" float\n")
 
-    for j in range(z_dim):
+    for j in range(z_dim): # TODO BUG HERE 3 DIMENSIONS
         for j in range(y_dim):
             for i in range(x_dim):
                 f.write(str(mesh.x[i])+" "+str(mesh.y[j])+" "+str(0.0)+"\n")

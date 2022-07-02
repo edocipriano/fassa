@@ -1,5 +1,5 @@
 from fassa.Field import Field
-import fassa.fluxes as fluxes
+from fassa.fieldtypes import *
 
 def mag(f):
     """
@@ -15,8 +15,8 @@ def grad(f, mesh):
     Return a vector field and a scalar field with the gradient
     of f and with the norm of the gradient f
     """
-    gradvec = fassa.fieldtypes.VectorField(mesh)
-    gradmag = fassa.fieldtypes.ScalarField(mesh)
+    gradvec = fieldtypes.VectorField(mesh)
+    gradmag = fieldtypes.ScalarField(mesh)
 
     for i in range(1, mesh.nx+1):
         for j in range(1, mesh.ny+1):
@@ -25,5 +25,10 @@ def grad(f, mesh):
             gradvec[i,j,2] = 0. # 2D
             gradmag[i,j] = (gradvec[i,j,0]**2 + gradvec[i,j,1]**2)**0.5
 
+    return gradvec, gradmag
+
+
+def grad(f):
+    gradvec, gradmag = grad(f.cells, f.mesh)
     return gradvec, gradmag
 

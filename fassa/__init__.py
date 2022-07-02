@@ -1,20 +1,15 @@
 from . import (
-    utils,
-    vof,
-    solve
+    vof
 )
 
 from .hexCMesh import hexCMesh
 from .Time import Time
 from .Field import *
 import fassa.timeStepSelector
-
-__all__ = [
-    "utils",
-    "vof",
-    "solve",
-    "hexCMesh",
-    "Time",
-    "Field",
-    "timeStepSelector"
-]
+from .ProjectionMethod import *
+from .write import *
+from .velocityFromStreamfunction import *
+from .divergence import *
+from .fieldtypes import *
+from .fluxes import *
+from .operators import *

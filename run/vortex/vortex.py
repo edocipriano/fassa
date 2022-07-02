@@ -2,7 +2,6 @@ import numpy as np
 import os
 import fassa
 import fassa.vof
-import fassa.utils
 
 def main():
 
@@ -12,8 +11,8 @@ def main():
     # Create Mesh and set Boundaries
     meshDict = {"Lx" : 1,
                 "Ly" : 1,
-                "nx" : 64,
-                "ny" : 64}
+                "nx" : 128,
+                "ny" : 128}
 
     mesh = fassa.hexCMesh(meshDict)
     mesh.setBasicBoundaries()
@@ -46,9 +45,10 @@ def main():
     alpha1 = fassa.Field("alpha1", alpha1Dict, mesh, 0.)
 
     # Read log from VOFI initialization
-    fassa.vof.utils.readVofi("../vofi/circle64/log", alpha1)
+    fassa.vof.utils.readVofi("../vofi/circle"+str(mesh.nx)+"/log", alpha1)
 
     advector = fassa.vof.Advector(alpha1, u, v, time)
+    advector.setEPSC(1.e-12)
 
     # Stream function
     phi = fassa.Field("phi", None, mesh, 0.)
@@ -59,13 +59,20 @@ def main():
     nx = fassa.Field("nx", None, mesh, 0.)
     ny = fassa.Field("ny", None, mesh, 0.)
 
+    # Output file
+    out = open("Output.out", "w")
+    out.write("time[s] mass[kg]\n")
+    out.close()
+    liqvolume0 = volume_integral(alpha1)
+
     # Solution loop
     while time.toRun():
 
         # Update stream function
         for i in range(mesh.nx+1):
             for j in range(mesh.ny+1):
-                phi.nodes[i,j] = 1./3.14*np.cos(3.14*time.value/T)*(np.sin(3.14*mesh.x[i])**2)*(np.sin(3.14*mesh.y[j])**2)
+                #phi.nodes[i,j] = 1./3.14*np.cos(3.14*time.value/T)*(np.sin(3.14*mesh.x[i])**2)*(np.sin(3.14*mesh.y[j])**2)
+                phi.nodes[i,j] = -1.5*np.sin(np.pi*time.value/T)*np.sin((mesh.x[i] + 0.5)*np.pi)*np.sin((mesh.y[j]+0.5)*np.pi)/np.pi
 
         # Compute velocity from the stream function
         velocityFromStreamfunction(phi, u, v)
@@ -79,6 +86,11 @@ def main():
 
         advector.advect()
 
+        liqvolume = volume_integral(alpha1)
+        out = open("Output.out", "a")
+        out.write("%f %f\n"%(time.value, liqvolume/liqvolume0))
+        out.close()
+
         # Assign fields to visualise
         nx.cells[:,:] = advector.n[:,:,0]
         ny.cells[:,:] = advector.n[:,:,1]
@@ -86,9 +98,18 @@ def main():
         if time.toWrite():
             fassa.nodeInterpolations(u, v, alpha1, nx, ny)
             filePath = "results/vortex_"+str(time.nTimeSteps)+".vtk"
-            fassa.utils.write.writeVtk(filePath, mesh, u, v, nx, ny, alpha1, phi)
+            fassa.writeVtk(filePath, mesh, u, v, nx, ny, alpha1, phi)
 
     print("\nEnd\n")
+
+def volume_integral(alpha1):
+    mesh = alpha1.mesh
+    integral = 0.
+    for i in range(1, mesh.nx+1):
+        for j in range(1, mesh.ny+1):
+            integral += alpha1.cells[i,j]*mesh.step**3
+
+    return integral
 
 
 def velocityFromStreamfunction(phi, u, v):
@@ -97,15 +118,14 @@ def velocityFromStreamfunction(phi, u, v):
     """
     mesh = u.mesh
 
-    # u = d(phi)/dy
-    for i in range(1, mesh.nx+1):
-        for j in range(1, mesh.ny):
-             u.cells[i,j] = (phi.nodes[i,j] - phi.nodes[i,j-1])/(mesh.y[j] - mesh.y[j-1])
-
-    # v = -d(phi)/dx
     for i in range(1, mesh.nx):
-        for j in range(1, mesh.ny+1):
-            v.cells[i,j] = -(phi.nodes[i,j] - phi.nodes[i-1,j])/(mesh.x[i] - mesh.x[i-1])
+        for j in range(1, mesh.ny):
+            u.cells[i,j] = -(phi.nodes[i+1,j] - phi.nodes[i,j])/(mesh.x[i+1] - mesh.x[i])
+
+    for i in range(1, mesh.nx):
+        for j in range(1, mesh.ny):
+            v.cells[i,j] = (phi.nodes[i,j+1] - phi.nodes[i,j])/(mesh.y[j+1] - mesh.y[j])
+
 
 
 if __name__=="__main__":
