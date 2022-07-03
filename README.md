@@ -1,4 +1,4 @@
-# <h1 align="center">Fassa</h1>
+# Fassa
 Geometric VOF interface advection using an Eulerian Implicit method (Weymouth and Yue) and field operations on cartesian grids.
 
 ## Val di Fassa
@@ -19,15 +19,19 @@ The volume fraction fields are initialized using the [Vofi library](https://gith
 The simulation results are .vtk files that can be visualized using [Paraview](https://www.paraview.org).
 
 ## Installation using 'pip'
-```
-git clone https://github.com/edocipriano/fassa.git
-cd fassa
-python3 setup.py bdist_wheel
-pip3 install dist/fassa-1.1.0-cp38-cp38-macosx_11_0_x86_64.whl
+```sh
+$ git clone https://github.com/edocipriano/fassa.git
+$ cd fassa
+$ python3 setup.py bdist_wheel
+$ pip3 install dist/fassa-1.1.0-cp38-cp38-macosx_11_0_x86_64.whl
 ```
 
 The path of the last instruction may change based on the OS, and the version of the package.
 
-## Code Structure
+## Structure
+Fassa is organized in three main folders: paris, fassa, run.
+* **paris**: it is a module that contains functions taken from the Paris simulator code. These functions are written in fortran and compiled using f2py in order to be imported from the python code. This module performs geometric operations, such as finding the interface normal using the Young's method, finding the plane constant, and cutting a cubic cell with a plane in order to find the fraction of cell occupied by the reference phase.
+* **fassa**: it is the main module of this project. It contains a small collection of classes and functions that allow to easily peform VOF simulations, to solve the pressure-velocity coupling using a fairly simple Projection Method, and to write the simulation results in vtk format.
+* **run**: contains examples of simulations performed using fassa. The most remarkable cases are **vortex** and **zalesak**, which are classical VOF-advection benchmark simulations. In these simulations, a circle is advected by a prescribed velocity field and the final configuration is compared with the initial position of the circle, in order to test the accuracy of the implemented advection method.
 
 
