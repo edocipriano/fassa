@@ -30,9 +30,9 @@ The path of the last instruction may change based on the OS, and the version of 
 
 ## Structure
 Fassa is organized in three main folders: paris, fassa, run.
+* **fassa**: the main module of this project. It contains a small collection of classes and functions that allow to easily peform VOF simulations, to solve the pressure-velocity coupling using a fairly simple Projection Method, and to write the simulation results in vtk format.
 * **paris**: a module that contains a few functions taken from the [Paris simulator](http://www.ida.upmc.fr/~zaleski/paris/) code. These functions are written in fortran and compiled using f2py in order to be imported from the python code. This module performs geometric operations, such as finding the interface normal using the Young's method, finding the plane constant, and cutting a cubic cell with a plane in order to find the fraction of cell occupied by the reference phase.
 > Aniszewski, Wojciech, et al. "Parallel, robust, interface simulator (PARIS)." Computer Physics Communications 263 (2021): 107849.
-* **fassa**: the main module of this project. It contains a small collection of classes and functions that allow to easily peform VOF simulations, to solve the pressure-velocity coupling using a fairly simple Projection Method, and to write the simulation results in vtk format.
 * **run**: contains examples of simulations performed using fassa. The most remarkable cases are **vortex** and **zalesak**, which are classical VOF-advection benchmark simulations. In these simulations, a circle is advected by a prescribed velocity field and the final configuration is compared with the initial position of the circle, in order to test the accuracy of the implemented advection method.
 > Tryggvason, Grétar, Ruben Scardovelli, and Stéphane Zaleski. Direct numerical simulations of gas–liquid multiphase flows. Cambridge university press, 2011.
 
