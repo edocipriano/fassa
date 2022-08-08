@@ -42,5 +42,6 @@ After the installation process, one can simply run the examples typing:
 $ cd run/vortex
 $ python3 vortex.py
 ```
-The simulation will create a folder called **results** where the vtk results are stored.
+The simulation will create a folder called **results** where the vtk results are stored. After some post-processing using Paraview, the vortex results will look like this:
 
+<img src="./run/vortex/fig-vortex.png" alt="vortex" width="1200"/>
