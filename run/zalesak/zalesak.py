@@ -1,5 +1,5 @@
 import numpy as np
-import os
+import os, math
 import fassa
 import fassa.vof
 
@@ -9,10 +9,11 @@ def main():
         os.mkdir("results")
 
     # Create Mesh and set Boundaries
+    mn = 128
     meshDict = {"Lx" : 1,
                 "Ly" : 1,
-                "nx" : 128,
-                "ny" : 128}
+                "nx" : nm,
+                "ny" : nm}
 
     mesh = fassa.hexCMesh(meshDict)
     mesh.setBasicBoundaries()
@@ -41,8 +42,8 @@ def main():
     alpha1 = fassa.Field("alpha1", alpha1Dict, mesh, 0.)
 
     # Read log from VOFI initialization
-    fassa.vof.utils.readVofi("../vofi/circle128/log", alpha1)
-    alpha1.cells[61:69,50:101] = 0.
+    fassa.vof.utils.readVofi("../vofi/circle"+str(mesh.nx)+"/log", alpha1)
+    alpha1.cells[math.ceil(61/128*mesh.nx):math.ceil(69/128*mesh.nx),math.ceil(50/128*mesh.nx):math.ceil(101/128*mesh.nx)] = 0.
 
     advector = fassa.vof.Advector(alpha1, u, v, time)
 

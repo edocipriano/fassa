@@ -2,6 +2,7 @@ import numpy as np
 import os
 import fassa
 import fassa.vof
+import fassa.BCs
 
 def main():
 
@@ -9,18 +10,19 @@ def main():
         os.mkdir("results")
 
     # Create Mesh and set Boundaries
+    mn = 128
     meshDict = {"Lx" : 1,
                 "Ly" : 1,
-                "nx" : 128,
-                "ny" : 128}
+                "nx" : mn,
+                "ny" : mn}
 
     mesh = fassa.hexCMesh(meshDict)
     mesh.setBasicBoundaries()
     mesh.setBasicCorners()
 
     # Vortex parameters
-    T = 8
-    CFL = 1
+    T = 15
+    CFL = 1.
 
     # Create Time
     timeDict = {"totTime"       : T,
@@ -28,7 +30,7 @@ def main():
                 "runTimeDeltaT" : False,
                 "safety"        : 1,
                 "deltaT"        : 1.e-2,
-                "writeSteps"    : 10}
+                "writeSteps"    : 20}
 
     time = fassa.Time(timeDict, mesh)
 
@@ -69,13 +71,13 @@ def main():
     while time.toRun():
 
         # Update stream function
+        pi = 3.1415926
         for i in range(mesh.nx+1):
             for j in range(mesh.ny+1):
-                #phi.nodes[i,j] = 1./3.14*np.cos(3.14*time.value/T)*(np.sin(3.14*mesh.x[i])**2)*(np.sin(3.14*mesh.y[j])**2)
-                phi.nodes[i,j] = -1.5*np.sin(np.pi*time.value/T)*np.sin((mesh.x[i] + 0.5)*np.pi)*np.sin((mesh.y[j]+0.5)*np.pi)/np.pi
+              phi.nodes[i,j] = - 1.5*np.sin(2.*pi*time.value/T)*np.sin((mesh.x[i] + 0.5)*pi)*np.sin((mesh.y[j] + 0.5)*pi)/pi;
 
         # Compute velocity from the stream function
-        velocityFromStreamfunction(phi, u, v)
+        velocityFromStreamfunction(phi, u, v, time, T)
 
         dtMin = fassa.timeStepSelector.alphaCo(u, v)
         time.setDeltaT(dtMin)
@@ -112,19 +114,21 @@ def volume_integral(alpha1):
     return integral
 
 
-def velocityFromStreamfunction(phi, u, v):
+def velocityFromStreamfunction(phi, u, v, time, T):
     """
     Compute staggered  velocity fields from the stream function
     """
     mesh = u.mesh
 
     for i in range(1, mesh.nx):
-        for j in range(1, mesh.ny):
+        for j in range(1, mesh.ny+1):
             u.cells[i,j] = -(phi.nodes[i+1,j] - phi.nodes[i,j])/(mesh.x[i+1] - mesh.x[i])
+            #u.cells[i,j] =  2.*np.cos(3.14*time.value/T)*np.sin(3.14*mesh.x[i])**2*np.sin(3.14*mesh.y[j])*np.cos(3.14*mesh.y[j])
 
-    for i in range(1, mesh.nx):
+    for i in range(1, mesh.nx+1):
         for j in range(1, mesh.ny):
             v.cells[i,j] = (phi.nodes[i,j+1] - phi.nodes[i,j])/(mesh.y[j+1] - mesh.y[j])
+            #v.cells[i,j] = -2.*np.cos(3.14*time.value/T)*np.sin(3.14*mesh.y[j])**2*np.sin(3.14*mesh.x[i])*np.cos(3.14*mesh.x[i])
 
 
 

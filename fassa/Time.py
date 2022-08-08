@@ -12,6 +12,7 @@ class Time:
         self.value = 0
         self.nTimeSteps = 0
         self.stopNext = False
+        self.lastStep = False
 
     def toRun(self):
         """
@@ -31,7 +32,9 @@ class Time:
             self.stopNext = True
             return True
         else:
-            if self.value < self.totTime:
+            if self.value <= self.totTime:
+                if self.value + self.deltaT >= self.totTime:
+                  self.lastStep = True
                 self.update()
                 return True
             else:
@@ -48,7 +51,8 @@ class Time:
         if self.writeNow:
             return True
         else:
-            if self.nTimeSteps%self.writeSteps == 0 or self.nTimeSteps == 1:
+            if self.nTimeSteps%self.writeSteps == 0 or self.nTimeSteps == 1 or self.lastStep == True:
+                print ("Writing results")
                 return True
             else:
                 return False
